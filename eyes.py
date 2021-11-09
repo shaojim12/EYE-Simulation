@@ -673,17 +673,18 @@ curTime = time.time()
 eyeMoveFlag = True
 lux = 0  # this is for the light sensor
 
-ser2=serial.Serial("/dev/ttyACM1", 9600)
-ser2.baudrate=9600
 
-def communicateFunction():
-	while(True):
+# ser2=serial.Serial("/dev/ttyACM1", 9600)
+# ser2.baudrate=9600
+
+# def communicateFunction():
+# 	while(True):
     
-		print("start while loop to communicate with other device")
-		commandFromDevice= ser2.readline()
+# 		print("start while loop to communicate with other device")
+# 		commandFromDevice= ser2.readline()
 
-		temp_read = commandFromDevice.decode('utf-8')
-		temp_read = temp_read.strip()
+# 		temp_read = commandFromDevice.decode('utf-8')
+# 		temp_read = temp_read.strip()
 
 		
 
@@ -691,7 +692,7 @@ def communicateFunction():
 # setup serial port
 ser=serial.Serial("/dev/ttyACM0", 9600)
 ser.baudrate=9600
-
+'''
 def eye_direction(x, y, sensor, s1, s2, s3, s4):
     if s1 == 0:
         s1 = 9999
@@ -801,7 +802,7 @@ def soundDetect():
                 MIC_VAL= ser.readline()
                 sound_sensor_four = MIC_VAL.decode('utf-8').strip()
                 curXSet, curYSet = eye_direction(curXSet, curYSet, earliest_sound_sensor, float(sound_sensor_one), float(sound_sensor_two), float(sound_sensor_three), float(sound_sensor_four))
-        
+'''
              
 # setup sound thread   
 T_soundDetect = threading.Thread(target=soundDetect)
