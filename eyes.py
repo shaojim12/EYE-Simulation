@@ -18,6 +18,7 @@ from svg.path import Path, parse_path
 from xml.dom.minidom import parse
 from gfxutil import *
 from snake_eyes_bonnet import SnakeEyesBonnet
+from serial_input import Serial_input
 
 
 # INPUT CONFIG for eye motion ----------------------------------------------
@@ -673,6 +674,24 @@ curTime = time.time()
 eyeMoveFlag = True
 lux = 0  # this is for the light sensor
 
+serial_input = Serial_input(9600)
+serial_input.getSerialString()
+
+def control_dog():
+	while(True):
+		if serial_input.queue:
+			input1 = serial_input.queue.popleft()
+
+			if input1 == "command_mode_general":
+				change_mode("general")
+			elif input1 == "command_mode_general":
+				change_mode("clinical")
+
+			elif input1 == "pupil_size":
+				pass
+
+
+
 
 # ser2=serial.Serial("/dev/ttyACM1", 9600)
 # ser2.baudrate=9600
@@ -690,8 +709,8 @@ lux = 0  # this is for the light sensor
 
 
 # setup serial port
-ser=serial.Serial("/dev/ttyACM0", 9600)
-ser.baudrate=9600
+# ser=serial.Serial("/dev/ttyACM0", 9600)
+# ser.baudrate=9600
 '''
 def eye_direction(x, y, sensor, s1, s2, s3, s4):
     if s1 == 0:
@@ -805,19 +824,19 @@ def soundDetect():
 '''
              
 # setup sound thread   
-T_soundDetect = threading.Thread(target=soundDetect)
-T_soundDetect.start()
+# T_soundDetect = threading.Thread(target=soundDetect)
+# T_soundDetect.start()
 
-def change_mode(channel):
+def change_mode(mode):
     global OP_MODE
     global AUTOBLINK
-    if(OP_MODE == 0):
-        OP_MODE = 1
-        AUTOBLINK = False
-        time.sleep(0.5)
-    else:
+    if(mode == "general"):
         OP_MODE = 0
         AUTOBLINK = True
+        time.sleep(0.5)
+    elif(mode == "clinical"):
+        OP_MODE = 1
+        AUTOBLINK = False
         time.sleep(0.5)
         
 def add_pupil_size(channel):
@@ -838,9 +857,9 @@ def reduce_pupil_size(channel):
         elif temp_size < 0.2:
             temp_size = 0.2
 
-GPIO.add_event_detect(17, GPIO.FALLING, callback=change_mode, bouncetime=200)
-GPIO.add_event_detect(27, GPIO.FALLING, callback=add_pupil_size, bouncetime=200)
-GPIO.add_event_detect(23, GPIO.FALLING, callback=reduce_pupil_size, bouncetime=200)
+# GPIO.add_event_detect(17, GPIO.FALLING, callback=change_mode, bouncetime=200)
+# GPIO.add_event_detect(27, GPIO.FALLING, callback=add_pupil_size, bouncetime=200)
+# GPIO.add_event_detect(23, GPIO.FALLING, callback=reduce_pupil_size, bouncetime=200)
 
 temp_size = 0.2
 
