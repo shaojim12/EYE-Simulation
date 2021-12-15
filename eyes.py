@@ -700,25 +700,6 @@ def control_dog():
 T_control = threading.Thread(target = control_dog)
 T_control.start()
 
-
-# ser2=serial.Serial("/dev/ttyACM1", 9600)
-# ser2.baudrate=9600
-
-# def communicateFunction():
-# 	while(True):
-    
-# 		print("start while loop to communicate with other device")
-# 		commandFromDevice= ser2.readline()
-
-# 		temp_read = commandFromDevice.decode('utf-8')
-# 		temp_read = temp_read.strip()
-
-		
-
-
-# setup serial port
-# ser=serial.Serial("/dev/ttyACM0", 9600)
-# ser.baudrate=9600
 '''
 def eye_direction(x, y, sensor, s1, s2, s3, s4):
     if s1 == 0:
@@ -846,28 +827,6 @@ def change_mode(mode):
         OP_MODE = 1
         AUTOBLINK = False
         time.sleep(0.5)
-        
-# def add_pupil_size(channel):
-#     global temp_size
-#     global OP_MODE
-#     if (OP_MODE == 1):
-#         if temp_size <= 0.8:
-#             temp_size += 0.1
-#         elif temp_size > 0.8:
-#             temp_size = 0.8
-        
-# def reduce_pupil_size(channel):
-#     global temp_size
-#     global OP_MODE
-#     if (OP_MODE == 1):
-#         if temp_size >= 0.2:
-#             temp_size -= 0.1
-#         elif temp_size < 0.2:
-#             temp_size = 0.2
-
-# GPIO.add_event_detect(17, GPIO.FALLING, callback=change_mode, bouncetime=200)
-# GPIO.add_event_detect(27, GPIO.FALLING, callback=add_pupil_size, bouncetime=200)
-# GPIO.add_event_detect(23, GPIO.FALLING, callback=reduce_pupil_size, bouncetime=200)
 
 temp_size = 20
 
@@ -888,11 +847,6 @@ while True:
   
     
     if PUPIL_IN >= 0: # Pupil scale from sensor
-		#v = bonnet.channel[PUPIL_IN].value
-		# If you need to calibrate PUPIL_MIN and MAX,
-		# add a 'print v' here for testing.
-        #print(v)
-        #print("aaaaaaaa")
         if   v < PUPIL_MIN: v = PUPIL_MIN
         elif v > PUPIL_MAX: v = PUPIL_MAX
 		# Scale to 0.0 to 1.0:
