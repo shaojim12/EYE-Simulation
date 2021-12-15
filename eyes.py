@@ -691,11 +691,14 @@ def control_dog():
 				print(inputList[2])
 				if inputList[2] == "general":
 					change_mode("general")
+					serial_input.sendSerialString("change mode, general")
 				elif inputList[2] == "clinical":
 					change_mode("clinical")
+					serial_input.sendSerialString("change mode, clinical")
 
 			elif inputList[1] == "pupilsize":
 				temp_size = int(inputList[2])
+				serial_input.sendSerialString("change pupil size, " + str(temp_size))
 
 T_control = threading.Thread(target = control_dog)
 T_control.start()
