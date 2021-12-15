@@ -675,22 +675,30 @@ eyeMoveFlag = True
 lux = 0  # this is for the light sensor
 
 serial_input = Serial_input(9600)
-serial_input.getSerialString()
+T_serial = threading.Thread(target=serial_input.getSerialString)
+T_serial.start()
 
 def control_dog():
+	global temp_size
+
 	while(True):
+		time.sleep(2)
 		if serial_input.queue:
 			input1 = serial_input.queue.popleft()
+			inputList = input1.split("_")
+			print(inputList[1])
+			if inputList[1] == "mode":
+				print(inputList[2])
+				if inputList[2] == "general":
+					change_mode("general")
+				elif inputList[2] == "clinical":
+					change_mode("clinical")
 
-			if input1 == "command_mode_general":
-				change_mode("general")
-			elif input1 == "command_mode_general":
-				change_mode("clinical")
+			elif inputList[1] == "pupilsize":
+				temp_size = int(inputList[2])
 
-			elif input1 == "pupil_size":
-				pass
-
-
+T_control = threading.Thread(target = control_dog)
+T_control.start()
 
 
 # ser2=serial.Serial("/dev/ttyACM1", 9600)
@@ -839,75 +847,45 @@ def change_mode(mode):
         AUTOBLINK = False
         time.sleep(0.5)
         
-def add_pupil_size(channel):
-    global temp_size
-    global OP_MODE
-    if (OP_MODE == 1):
-        if temp_size <= 0.8:
-            temp_size += 0.1
-        elif temp_size > 0.8:
-            temp_size = 0.8
+# def add_pupil_size(channel):
+#     global temp_size
+#     global OP_MODE
+#     if (OP_MODE == 1):
+#         if temp_size <= 0.8:
+#             temp_size += 0.1
+#         elif temp_size > 0.8:
+#             temp_size = 0.8
         
-def reduce_pupil_size(channel):
-    global temp_size
-    global OP_MODE
-    if (OP_MODE == 1):
-        if temp_size >= 0.2:
-            temp_size -= 0.1
-        elif temp_size < 0.2:
-            temp_size = 0.2
+# def reduce_pupil_size(channel):
+#     global temp_size
+#     global OP_MODE
+#     if (OP_MODE == 1):
+#         if temp_size >= 0.2:
+#             temp_size -= 0.1
+#         elif temp_size < 0.2:
+#             temp_size = 0.2
 
 # GPIO.add_event_detect(17, GPIO.FALLING, callback=change_mode, bouncetime=200)
 # GPIO.add_event_detect(27, GPIO.FALLING, callback=add_pupil_size, bouncetime=200)
 # GPIO.add_event_detect(23, GPIO.FALLING, callback=reduce_pupil_size, bouncetime=200)
 
-temp_size = 0.2
+temp_size = 20
 
-while True:
-    '''
-    if(not GPIO.input(17)):
-        if(OP_MODE == 0):
-            # JOYSTICK_X_IN = 1
-            # JOYSTICK_Y_IN = 1
-            OP_MODE = 1
-            AUTOBLINK = False
-            time.sleep(0.5)
-        else:
-            # JOYSTICK_X_IN = -1
-            # JOYSTICK_Y_IN = -1
-            OP_MODE = 0
-            AUTOBLINK = True
-            time.sleep(0.5)
-    '''
-           
+while True:     
     if (time.time() - curTime > 3):
         lux = sensorLight.infrared
-        #print(lux)
         curTime = time.time()
-    if(OP_MODE == 0):
+
+    if (OP_MODE == 0):
         if (lux > 500):
             v = 0.2
         elif (lux <= 500):
             v = 0.8
-    elif(OP_MODE == 1):
-        '''
-        if(not GPIO.input(27)):
-            if temp_size <= 0.8:
-                temp_size += 0.1
-            elif temp_size > 0.8:
-                temp_size = 0.8
-            time.sleep(0.3)
-        elif(not GPIO.input(23)):
-            if temp_size >= 0.2:
-                temp_size -= 0.1
-            elif temp_size < 0.2:
-                temp_size = 0.2
-            time.sleep(0.3)
-        '''
-        pupil_size(temp_size)
+
+    elif (OP_MODE == 1):
+        pupil_size(temp_size / 100)
         #print(v)
   
-
     
     if PUPIL_IN >= 0: # Pupil scale from sensor
 		#v = bonnet.channel[PUPIL_IN].value
