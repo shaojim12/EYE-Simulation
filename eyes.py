@@ -349,11 +349,6 @@ def frame(p):
 
 	if(OP_MODE == 1):
         # Eye position from analog inputs
-        # curX = adcValue[JOYSTICK_X_IN]
-        # curY = adcValue[JOYSTICK_Y_IN]
-        # if JOYSTICK_X_FLIP: curX = 1.0 - curX
-        # if JOYSTICK_Y_FLIP: curY = 1.0 - curY
-		#print("inside OP mode")
 		curX = curXSet
 		curY = curYSet
 	else :
@@ -663,9 +658,6 @@ def split( # Recursive simulated pupil response when no analog sensor
 
 
 # MAIN LOOP -- runs continuously -------------------------------------------
-def pupil_size(size):
-    global v
-    v = size
 
 # setup the light sensor
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -674,9 +666,31 @@ curTime = time.time()
 eyeMoveFlag = True
 lux = 0  # this is for the light sensor
 
+# start serial thread
 serial_input = Serial_input(9600)
 T_serial = threading.Thread(target=serial_input.getSerialString)
 T_serial.start()
+
+def pupil_size(size):
+    global v
+    v = size
+
+def change_eye_direction(x, y):
+	global curXSet, curYSet
+	curXSet = x
+	curYSet = y
+
+def change_mode(mode):
+    global OP_MODE
+    global AUTOBLINK
+    if(mode == "general"):
+        OP_MODE = 0
+        AUTOBLINK = True
+        time.sleep(0.5)
+    elif(mode == "clinical"):
+        OP_MODE = 1
+        AUTOBLINK = False
+        time.sleep(0.5)
 
 def control_dog():
 	global temp_size
@@ -700,136 +714,9 @@ def control_dog():
 				temp_size = int(inputList[2])
 				serial_input.sendSerialString("change pupil size, " + str(temp_size))
 
+# start dog control thread
 T_control = threading.Thread(target = control_dog)
 T_control.start()
-
-'''
-def eye_direction(x, y, sensor, s1, s2, s3, s4):
-    if s1 == 0:
-        s1 = 9999
-    if s2 == 0:
-        s2 = 9999  
-    if s3 == 0:
-        s3 = 9999 
-    if s4 == 0:
-        s4 = 9999  
-    if s1 == 9999 and s2 == 9999 and s3 == 9999 and s4 == 9999:
-        if sensor == 'A':
-            x, y = 0, 0
-        elif sensor == 'B':
-            x, y = -10, 0
-        elif sensor == 'C':
-            x, y = 0, 10
-        elif sensor == 'D':
-            x, y = 10, 0
-    elif sensor == 'A':
-        if s2 > 1000 and s3 > 1000 and s4 > 1000:
-            x, y = 0, 0
-        elif s2 < 1000 and s3 < 1000 and s4 < 1000:
-            x, y = 0, 0
-        elif s2 < 1000 and s3 > 1000 and s4 > 1000:
-            x, y = -15, 0
-        elif s2 > 1000 and s3 > 1000 and s4 < 1000:
-            x, y = 15, 0
-        elif s2 > 1000 and s3 < 1000 and s4 > 1000:
-            x, y = 0, 15
-        elif s2 > 1000 and s3 < 1000 and s4 < 1000:
-            x, y = 15, 15
-        elif s2 < 1000 and s3 < 1000 and s4 > 1000:
-            x, y = -15, 15
-    elif sensor == 'B':
-        if s1 > 1000 and s3 > 1000 and s4 > 1000:
-            x, y = -30, 0
-        elif s1 < 1000 and s3 > 1000 and s4 > 1000:
-            x, y = -15, 0
-        elif s1 < 1000 and s3 < 1000 and s4 > 1000:
-            x, y = -15, 15
-        elif s1 > 1000 and s3 < 1000 and s4 > 1000:
-            x, y = -25, 25
-    elif sensor == 'C':
-        if s1 > 1000 and s2 > 1000 and s4 > 1000:
-            x, y = 0, 30
-        elif s1 < 1000 and s2 > 1000 and s4 < 1000:
-            x, y = 10, 20
-        elif s1 < 1000 and s2 < 1000 and s4 > 1000:
-            x, y = -10, 20
-        elif s1 < 1000 and s2 > 1000 and s4 > 1000:
-            x, y = 0, 20
-    elif sensor == 'D':
-        if s1 > 1000 and s2 > 1000 and s3 > 1000:
-            x, y = 30, 0
-        elif s1 < 1000 and s2 > 1000 and s3 > 1000:
-            x, y = 15, 0
-        elif s1 < 1000 and s2 > 1000 and s3 < 1000:
-            x, y = 15, 15
-        elif s1 > 1000 and s2 > 1000 and s3 < 1000:
-            x, y = 25, 25
-    print(sensor)
-    print(s1)
-    print(s2)
-    print(s3)
-    print(s4)
-    print(x)
-    print(y)
-    return x, y
-
-
-# setup sound detect
-def soundDetect():
-    act_intervel = 5 # the intervel for the next action
-    stay_time = 3 #the time that eye will stay in a direction
-    #use this to record the last time act to the sound
-    end_time = time.time() - act_intervel
-    
-    print("start sound detect")
-    while(True):
-        
-        print("start sound detect while loop")
-        MIC_VAL= ser.readline()
-        #print(MIC_VAL)
-
-        #print(MIC_VAL.decode('utf-8'))
-        temp_read = MIC_VAL.decode('utf-8')
-        temp_read = temp_read.strip()
-        #print(temp_read)
-
-        global JOYSTICK_X_IN
-        global JOYSTICK_Y_IN
-        global OP_MODE
-        global curXSet, curYSet
-        global v
-        global earliest_sound_sensor
-        global sound_sensor_one, sound_sensor_two, sound_sensor_three, sound_sensor_four
-        
-        if(OP_MODE == 1):
-            if(temp_read == 'A' or temp_read == 'B' or temp_read == 'C' or temp_read == 'D'):
-                earliest_sound_sensor = temp_read
-                MIC_VAL= ser.readline()
-                sound_sensor_one = MIC_VAL.decode('utf-8').strip()
-                MIC_VAL= ser.readline()
-                sound_sensor_two = MIC_VAL.decode('utf-8').strip()
-                MIC_VAL= ser.readline()
-                sound_sensor_three = MIC_VAL.decode('utf-8').strip()
-                MIC_VAL= ser.readline()
-                sound_sensor_four = MIC_VAL.decode('utf-8').strip()
-                curXSet, curYSet = eye_direction(curXSet, curYSet, earliest_sound_sensor, float(sound_sensor_one), float(sound_sensor_two), float(sound_sensor_three), float(sound_sensor_four))
-'''
-             
-# setup sound thread   
-# T_soundDetect = threading.Thread(target=soundDetect)
-# T_soundDetect.start()
-
-def change_mode(mode):
-    global OP_MODE
-    global AUTOBLINK
-    if(mode == "general"):
-        OP_MODE = 0
-        AUTOBLINK = True
-        time.sleep(0.5)
-    elif(mode == "clinical"):
-        OP_MODE = 1
-        AUTOBLINK = False
-        time.sleep(0.5)
 
 temp_size = 20
 
