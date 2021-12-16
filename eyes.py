@@ -692,6 +692,8 @@ def change_mode(mode):
         AUTOBLINK = False
         time.sleep(0.5)
 
+# dog control function which split the command string, 
+# and change features
 def control_dog():
 	global temp_size
 
@@ -700,19 +702,33 @@ def control_dog():
 		if serial_input.queue:
 			input1 = serial_input.queue.popleft()
 			inputList = input1.split("_")
-			print(inputList[1])
-			if inputList[1] == "mode":
-				print(inputList[2])
-				if inputList[2] == "general":
-					change_mode("general")
-					serial_input.sendSerialString("change mode, general")
-				elif inputList[2] == "clinical":
-					change_mode("clinical")
-					serial_input.sendSerialString("change mode, clinical")
+			try:
+				if inputList[1] == "mode":
+					if inputList[2] == "general":
+						change_mode("general")
+						change_eye_direction(0, 0)
+						serial_input.sendSerialString("change mode, general")
+					elif inputList[2] == "clinical":
+						change_mode("clinical")
+						serial_input.sendSerialString("change mode, clinical")
 
-			elif inputList[1] == "pupilsize":
-				temp_size = int(inputList[2])
-				serial_input.sendSerialString("change pupil size, " + str(temp_size))
+				elif inputList[1] == "pupilsize":
+					temp_size = int(inputList[2])
+					serial_input.sendSerialString("change pupil size, " + str(temp_size))
+
+				elif inputList[1] == "pos":
+					if inputList[2] == "auto":
+						posX, posY = int(inputList[3]), int(inputList[4])
+						change_eye_direction(posX, posY)
+					else:
+						posX, posY = int(inputList[2]), int(inputList[3])
+						change_eye_direction(posX, posY)
+						serial_input.sendSerialString("change pos, " + str(posX) + ", " + str(posY))
+				else:
+					serial_input.sendSerialString("incorrect command")
+			except:
+				serial_input.sendSerialString("incorrect command")
+				
 
 # start dog control thread
 T_control = threading.Thread(target = control_dog)
@@ -720,6 +736,7 @@ T_control.start()
 
 temp_size = 20
 
+# the main loop
 while True:     
     if (time.time() - curTime > 3):
         lux = sensorLight.infrared
@@ -734,7 +751,6 @@ while True:
     elif (OP_MODE == 1):
         pupil_size(temp_size / 100)
         #print(v)
-  
     
     if PUPIL_IN >= 0: # Pupil scale from sensor
         if   v < PUPIL_MIN: v = PUPIL_MIN

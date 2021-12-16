@@ -33,21 +33,27 @@ class Serial_input:
 # T_soundDetect.start()
     
 # while(True):
-#     time.sleep(3)
+#     time.sleep(2)
 #     if serial_input.queue:
 #         input1 = serial_input.queue.popleft()
-#         print("lenth", len(input1))
-#         print(input1)
-#         serial_input.sendSerialString(input1)
-        # if input1 != None:
-        #     inputList = input1.split("_")
+#         inputList = input1.split("_")
+#         print(inputList)
+#         if inputList[1] == "mode":
+#             if inputList[2] == "general":
+#                 print("general")
+#                 serial_input.sendSerialString("change mode, general")
+#             elif inputList[2] == "clinical":
+#                 print("clinical")
+#                 serial_input.sendSerialString("change mode, clinical")
 
-        #     if inputList[1] == "mode":
-        #         if inputList[2] == "general":
-        #             print("general")
-        #         elif inputList[2] == "clinical":
-        #             print("clinical")
+#         elif inputList[1] == "pupilsize":
+#             temp_size = int(inputList[2])
+#             serial_input.sendSerialString("change pupil size, " + str(temp_size))
 
-        #     elif inputList[1] == "pupilsize":
-        #         temp_size = int(inputList[2])
-        #         print(temp_size)
+#         elif inputList[1] == "pos":
+#             try:
+#                 posX, posY = int(inputList[2]), int(inputList[3])
+#                 print(posX, posY)
+#                 serial_input.sendSerialString("change pos, " + str(posX) + ", " + str(posY))
+#             except:
+#                 pass
